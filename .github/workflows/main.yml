@@ -1,26 +1,33 @@
-name: CI Pipeline
+import os
+import shutil
+import subprocess
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+# Define the repository URL and the directory name
+repo_url = "https://github.com/sjunna-9819/CI-CD.git"
+dir_name = "CI-CD"
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# Check if the directory already exists
+if os.path.exists(dir_name):
+    # Ask the user what they want to do with the existing directory
+    print(f"The directory '{dir_name}' already exists.")
+    choice = input("Do you want to delete it (y) or rename it (r)? (y/r): ").strip().lower()
+    
+    if choice == 'y':
+        # Delete the existing directory
+        shutil.rmtree(dir_name)
+        print(f"Deleted '{dir_name}' directory.")
+    elif choice == 'r':
+        # Rename the existing directory
+        new_name = dir_name + "-backup"
+        os.rename(dir_name, new_name)
+        print(f"Renamed existing directory to '{new_name}'.")
+    else:
+        print("No action taken. Exiting.")
+        exit(1)
 
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Node.js
-      uses: actions/setup-node@v2
-      with:
-        node-version: '14'
-
-    - name: Install dependencies
-      run: npm install
-
-    - name: Run tests
-      run: npm test
+# Clone the repository
+try:
+    subprocess.run(["git", "clone", repo_url], check=True)
+    print(f"Cloned repository into '{dir_name}'.")
+except subprocess.CalledProcessError:
+    print("Error: Failed to clone repository.")
